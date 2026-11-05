@@ -11,7 +11,7 @@ RUN npm install -g pnpm && pnpm install --ignore-scripts
 
 # Copy source and build
 COPY frontend/ ./
-RUN pnpm run build
+RUN rm -rf /app/build && pnpm run build
 
 # Final stage: Nginx server
 FROM nginx:alpine
