@@ -1,0 +1,19 @@
+# Environment files
+.env
+
+# Dependencies
+node_modules
+
+# Build outputs
+frontend/build
+backend/dist
+
+# Docker
+.docker-compose
+.DS_Store
+
+# Nginx config backup if any
+docker/nginx/conf.d/default.conf.bak
+
+# Logs
+api-logs/*
