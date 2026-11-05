@@ -8,8 +8,9 @@ WORKDIR /app
 COPY backend/package.json ./
 RUN npm install --frozen-lockfile
 
-# Copy source code
+# Copy source code and build
 COPY backend/ ./
+RUN rm -rf /app/dist && npm run build
 
 # Final stage: runtime
 FROM node:18-alpine
