@@ -6,13 +6,13 @@ services:
     volumes:
       - db-data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').code", "exit 0"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "if (db.adminCommand('ping').ok !== 1) { quit(1); }"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     environment:
-      MONGO_INIT_DB: app
+      MONGO_INITDB_DATABASE: app
 
   redis:
     image: redis:7-alpine
@@ -64,14 +64,14 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - web-static:/usr/share/nginx/html:ro
+      - ./docker/nginx/proxy.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       web:
+        condition: service_healthy
+      api:
         condition: service_healthy
 
 volumes:
   db-data:
   redis-data:
-  web-static:
   api-logs:
