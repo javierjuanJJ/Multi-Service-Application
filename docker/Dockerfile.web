@@ -1,15 +1,17 @@
 # Multi-stage build for Web (React + TypeScript)
-# Builder stage: install deps and build
+# Builder stage: install deps and build with Node 18
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies
-COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+# Pin pnpm to a release that supports Node 18
+RUN npm install -g pnpm@9.15.9
 
-RUN npm install -g pnpm && pnpm install --ignore-scripts
+# Install dependencies from the lockfile
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Copy source and build
+# Copy source and build (Vite writes the static assets to /app/build)
 COPY frontend/ ./
 RUN rm -rf /app/build && pnpm run build
 
@@ -23,4 +25,8 @@ COPY --from=builder /app/build /usr/share/nginx/html
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=5 \
+  CMD wget -qO- http://localhost/ || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]
